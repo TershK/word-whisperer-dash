@@ -37,15 +37,15 @@ export function exportToJSON(batch: BatchResult): void {
 }
 
 export function exportToPDF(batch: BatchResult): void {
-  // Create a simple HTML-based PDF-like content
   const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <title>${batch.name} - Sentiment Analysis Report</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 900px; margin: 0 auto; }
     h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; }
+    h2 { color: #334155; margin-top: 32px; }
     .summary { background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; }
     .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .stat { text-align: center; }
@@ -54,13 +54,21 @@ export function exportToPDF(batch: BatchResult): void {
     .positive { color: #16a34a; }
     .negative { color: #dc2626; }
     .neutral { color: #f59e0b; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    th { background: #f8fafc; font-weight: 600; }
+    .result-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; page-break-inside: avoid; }
+    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; }
     .badge-positive { background: #dcfce7; color: #16a34a; }
     .badge-negative { background: #fee2e2; color: #dc2626; }
     .badge-neutral { background: #fef3c7; color: #f59e0b; }
+    .text-content { background: #f8fafc; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; }
+    .keywords { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .keyword { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .keyword-positive { background: #dcfce7; color: #16a34a; }
+    .keyword-negative { background: #fee2e2; color: #dc2626; }
+    .keyword-neutral { background: #fef3c7; color: #f59e0b; }
+    .explanation { font-size: 13px; color: #64748b; font-style: italic; }
+    .confidence { font-size: 12px; color: #64748b; }
+    @media print { body { padding: 20px; } }
   </style>
 </head>
 <body>
@@ -92,29 +100,29 @@ export function exportToPDF(batch: BatchResult): void {
     </p>
   </div>
 
-  <h3>Detailed Results</h3>
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 50%;">Text</th>
-        <th>Sentiment</th>
-        <th>Confidence</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${batch.results.map(r => `
-        <tr>
-          <td>${r.text.length > 100 ? r.text.slice(0, 100) + '...' : r.text}</td>
-          <td><span class="badge badge-${r.sentiment}">${r.sentiment}</span></td>
-          <td>${(r.confidence * 100).toFixed(1)}%</td>
-        </tr>
-      `).join('')}
-    </tbody>
-  </table>
+  <h2>Detailed Analysis Results</h2>
+  ${batch.results.map((r, index) => `
+    <div class="result-card">
+      <div class="result-header">
+        <strong>#${index + 1}</strong>
+        <div>
+          <span class="badge badge-${r.sentiment}">${r.sentiment.charAt(0).toUpperCase() + r.sentiment.slice(1)}</span>
+          <span class="confidence" style="margin-left: 8px;">${(r.confidence * 100).toFixed(1)}% confidence</span>
+        </div>
+      </div>
+      <div class="text-content">${r.text}</div>
+      ${r.keywords.length > 0 ? `
+        <div class="keywords">
+          <strong style="font-size: 12px; margin-right: 8px;">Keywords:</strong>
+          ${r.keywords.map(kw => `<span class="keyword keyword-${kw.sentiment}">${kw.word}</span>`).join('')}
+        </div>
+      ` : ''}
+      <div class="explanation">${r.explanation}</div>
+    </div>
+  `).join('')}
 </body>
 </html>`;
 
-  // Open in new window for printing
   const printWindow = window.open('', '_blank');
   if (printWindow) {
     printWindow.document.write(htmlContent);
