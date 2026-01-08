@@ -7,6 +7,21 @@ interface SentimentResultProps {
 }
 
 export function SentimentResultCard({ result }: SentimentResultProps) {
+  const getMoodDetails = (sentiment: string, confidence: number) => {
+    if (sentiment === 'positive') {
+      if (confidence >= 0.8) return { emoji: '😄', mood: 'Ecstatic' };
+      if (confidence >= 0.6) return { emoji: '😊', mood: 'Happy' };
+      return { emoji: '🙂', mood: 'Content' };
+    } else if (sentiment === 'negative') {
+      if (confidence >= 0.8) return { emoji: '😠', mood: 'Angry' };
+      if (confidence >= 0.6) return { emoji: '😔', mood: 'Sad' };
+      return { emoji: '😕', mood: 'Disappointed' };
+    } else {
+      if (confidence >= 0.7) return { emoji: '😐', mood: 'Indifferent' };
+      return { emoji: '🤔', mood: 'Contemplative' };
+    }
+  };
+
   const sentimentConfig = {
     positive: {
       icon: ThumbsUp,
@@ -34,6 +49,8 @@ export function SentimentResultCard({ result }: SentimentResultProps) {
     },
   };
 
+  const moodDetails = getMoodDetails(result.sentiment, result.confidence);
+
   const config = sentimentConfig[result.sentiment];
   const Icon = config.icon;
 
@@ -53,6 +70,17 @@ export function SentimentResultCard({ result }: SentimentResultProps) {
           <p className={`text-2xl font-bold ${config.textClass}`}>
             {(result.confidence * 100).toFixed(1)}%
           </p>
+        </div>
+      </div>
+
+      {/* Mood Indicator */}
+      <div className={`mb-4 p-4 rounded-xl ${config.bgClass} border border-${config.textClass}/20`}>
+        <div className="flex items-center gap-3">
+          <span className="text-4xl">{moodDetails.emoji}</span>
+          <div>
+            <p className="text-sm text-muted-foreground">Detected Mood</p>
+            <p className={`text-xl font-bold ${config.textClass}`}>{moodDetails.mood}</p>
+          </div>
         </div>
       </div>
 
