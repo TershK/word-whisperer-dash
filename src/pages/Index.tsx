@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Header } from '@/components/dashboard/Header';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { TextInput } from '@/components/dashboard/TextInput';
 import { SentimentResultCard } from '@/components/dashboard/SentimentResult';
 import { BatchResults } from '@/components/dashboard/BatchResults';
@@ -8,8 +9,9 @@ import { AccuracyReport } from '@/components/dashboard/AccuracyReport';
 import { ImageUpload } from '@/components/dashboard/ImageUpload';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
-import { Layers, GitCompare, Plus, Trash2 } from 'lucide-react';
+import { Layers, GitCompare, Plus, Trash2, Menu, Search, Bell, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('analyze');
@@ -76,187 +78,224 @@ const Index = () => {
   const comparisonBatches = batchResults.filter((b) => selectedBatches.includes(b.id));
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header activeTab={activeTab} onTabChange={setActiveTab} />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {activeTab === 'analyze' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <TextInput
-                onAnalyze={handleAnalyze}
-                onBatchAnalyze={handleBatchAnalyze}
-                isLoading={isLoading}
-              />
-              <ImageUpload
-                onTextExtracted={handleAnalyze}
-                isLoading={isLoading}
-              />
+        <div className="flex-1 flex flex-col">
+          {/* Top Header Bar */}
+          <header className="bg-card border-b border-border sticky top-0 z-50">
+            <div className="flex items-center justify-between px-6 py-3">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className="text-muted-foreground hover:text-foreground">
+                  <Menu className="w-5 h-5" />
+                </SidebarTrigger>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Search className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <HelpCircle className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    3
+                  </span>
+                </Button>
+                <div className="flex items-center gap-2 ml-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src="" />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">JD</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium text-foreground">John</span>
+                </div>
+              </div>
             </div>
+          </header>
 
-            {currentResult && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <SentimentResultCard result={currentResult} />
-                <div className="card-dashboard p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">
-                    Quick Tips
-                  </h3>
-                  <ul className="space-y-3 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      Upload a .txt or .csv file for batch analysis
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      Each line in the file will be analyzed separately
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      Export results in CSV, JSON, or PDF format
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      Compare multiple batches to track sentiment trends
-                    </li>
-                  </ul>
+          <main className="flex-1 p-6 overflow-auto">
+            {activeTab === 'analyze' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <TextInput
+                    onAnalyze={handleAnalyze}
+                    onBatchAnalyze={handleBatchAnalyze}
+                    isLoading={isLoading}
+                  />
+                  <ImageUpload
+                    onTextExtracted={handleAnalyze}
+                    isLoading={isLoading}
+                  />
                 </div>
-              </div>
-            )}
 
-            {!currentResult && (
-              <div className="card-dashboard p-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Start Analyzing
-                </h3>
-                <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                  Enter text above or upload a file to analyze sentiment. Get instant
-                  insights into emotional tone with confidence scores and key drivers.
-                </p>
-                <Button variant="outline" onClick={loadSampleData}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Load Sample Data
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'batch' && (
-          <div className="space-y-6">
-            {batchResults.length === 0 ? (
-              <div className="card-dashboard p-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Layers className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  No Batch Results Yet
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Upload a file with multiple texts or load sample data to get started.
-                </p>
-                <Button onClick={loadSampleData}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Load Sample Data
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-foreground">Batch Results</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {batchResults.length} batch{batchResults.length !== 1 ? 'es' : ''} analyzed
-                    </p>
+                {currentResult && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <SentimentResultCard result={currentResult} />
+                    <div className="card-dashboard p-6">
+                      <h3 className="text-lg font-semibold text-foreground mb-4">
+                        Quick Tips
+                      </h3>
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          Upload a .txt or .csv file for batch analysis
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          Each line in the file will be analyzed separately
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          Export results in CSV, JSON, or PDF format
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          Compare multiple batches to track sentiment trends
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {selectedBatches.length === 2 && (
-                      <Button
-                        onClick={() => setActiveTab('compare')}
-                        className="bg-primary text-primary-foreground"
-                      >
-                        <GitCompare className="w-4 h-4 mr-2" />
-                        Compare Selected
-                      </Button>
-                    )}
+                )}
+
+                {!currentResult && (
+                  <div className="card-dashboard p-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                      <Layers className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Start Analyzing
+                    </h3>
+                    <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                      Enter text above or upload a file to analyze sentiment. Get instant
+                      insights into emotional tone with confidence scores and key drivers.
+                    </p>
                     <Button variant="outline" onClick={loadSampleData}>
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Sample Data
+                      Load Sample Data
                     </Button>
                   </div>
-                </div>
-
-                {selectedBatches.length > 0 && selectedBatches.length < 2 && (
-                  <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
-                    Select one more batch to enable comparison view
-                  </div>
                 )}
+              </div>
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {batchResults.map((batch) => (
-                    <div
-                      key={batch.id}
-                      className={`card-dashboard p-4 cursor-pointer transition-all ${
-                        selectedBatches.includes(batch.id)
-                          ? 'ring-2 ring-primary'
-                          : ''
-                      }`}
-                      onClick={() => handleSelectBatch(batch.id)}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-foreground">{batch.name}</h4>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteBatch(batch.id);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-muted-foreground" />
+            {activeTab === 'batch' && (
+              <div className="space-y-6">
+                {batchResults.length === 0 ? (
+                  <div className="card-dashboard p-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                      <Layers className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No Batch Results Yet
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Upload a file with multiple texts or load sample data to get started.
+                    </p>
+                    <Button onClick={loadSampleData}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Load Sample Data
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-semibold text-foreground">Batch Results</h2>
+                        <p className="text-sm text-muted-foreground">
+                          {batchResults.length} batch{batchResults.length !== 1 ? 'es' : ''} analyzed
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {selectedBatches.length === 2 && (
+                          <Button
+                            onClick={() => setActiveTab('compare')}
+                            className="bg-primary text-primary-foreground"
+                          >
+                            <GitCompare className="w-4 h-4 mr-2" />
+                            Compare Selected
+                          </Button>
+                        )}
+                        <Button variant="outline" onClick={loadSampleData}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Sample Data
                         </Button>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 text-center">
-                        <div>
-                          <p className="text-lg font-bold text-sentiment-positive">
-                            {batch.summary.positive}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Positive</p>
-                        </div>
-                        <div>
-                          <p className="text-lg font-bold text-sentiment-negative">
-                            {batch.summary.negative}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Negative</p>
-                        </div>
-                        <div>
-                          <p className="text-lg font-bold text-sentiment-neutral">
-                            {batch.summary.neutral}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Neutral</p>
-                        </div>
-                      </div>
                     </div>
-                  ))}
-                </div>
 
-                {batchResults.length > 0 && (
-                  <BatchResults batch={batchResults[batchResults.length - 1]} />
+                    {selectedBatches.length > 0 && selectedBatches.length < 2 && (
+                      <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-muted-foreground">
+                        Select one more batch to enable comparison view
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {batchResults.map((batch) => (
+                        <div
+                          key={batch.id}
+                          className={`card-dashboard p-4 cursor-pointer transition-all ${
+                            selectedBatches.includes(batch.id)
+                              ? 'ring-2 ring-primary'
+                              : ''
+                          }`}
+                          onClick={() => handleSelectBatch(batch.id)}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-medium text-foreground">{batch.name}</h4>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteBatch(batch.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div>
+                              <p className="text-lg font-bold text-sentiment-positive">
+                                {batch.summary.positive}
+                              </p>
+                              <p className="text-xs text-muted-foreground">Positive</p>
+                            </div>
+                            <div>
+                              <p className="text-lg font-bold text-sentiment-negative">
+                                {batch.summary.negative}
+                              </p>
+                              <p className="text-xs text-muted-foreground">Negative</p>
+                            </div>
+                            <div>
+                              <p className="text-lg font-bold text-sentiment-neutral">
+                                {batch.summary.neutral}
+                              </p>
+                              <p className="text-xs text-muted-foreground">Neutral</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {batchResults.length > 0 && (
+                      <BatchResults batch={batchResults[batchResults.length - 1]} />
+                    )}
+                  </>
                 )}
-              </>
+              </div>
             )}
-          </div>
-        )}
 
-        {activeTab === 'compare' && comparisonBatches.length === 2 && (
-          <ComparisonView source1={comparisonBatches[0]} source2={comparisonBatches[1]} />
-        )}
+            {activeTab === 'compare' && comparisonBatches.length === 2 && (
+              <ComparisonView source1={comparisonBatches[0]} source2={comparisonBatches[1]} />
+            )}
 
-        {activeTab === 'accuracy' && <AccuracyReport />}
-      </main>
-    </div>
+            {activeTab === 'accuracy' && <AccuracyReport />}
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
