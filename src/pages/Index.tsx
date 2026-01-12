@@ -5,6 +5,7 @@ import { SentimentResultCard } from '@/components/dashboard/SentimentResult';
 import { BatchResults } from '@/components/dashboard/BatchResults';
 import { ComparisonView } from '@/components/dashboard/ComparisonView';
 import { AccuracyReport } from '@/components/dashboard/AccuracyReport';
+import { ImageUpload } from '@/components/dashboard/ImageUpload';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
 import { Layers, GitCompare, Plus, Trash2 } from 'lucide-react';
@@ -81,11 +82,17 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'analyze' && (
           <div className="space-y-6">
-            <TextInput
-              onAnalyze={handleAnalyze}
-              onBatchAnalyze={handleBatchAnalyze}
-              isLoading={isLoading}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TextInput
+                onAnalyze={handleAnalyze}
+                onBatchAnalyze={handleBatchAnalyze}
+                isLoading={isLoading}
+              />
+              <ImageUpload
+                onTextExtracted={handleAnalyze}
+                isLoading={isLoading}
+              />
+            </div>
 
             {currentResult && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

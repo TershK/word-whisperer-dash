@@ -1,6 +1,8 @@
 import { SentimentResult as SentimentResultType } from '@/types/sentiment';
 import { ThumbsUp, ThumbsDown, Minus, Tag, Info } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { StarRating } from './StarRating';
+import { TextToSpeech } from './TextToSpeech';
 
 interface SentimentResultProps {
   result: SentimentResultType;
@@ -84,6 +86,9 @@ export function SentimentResultCard({ result }: SentimentResultProps) {
         </div>
       </div>
 
+      {/* Star Rating */}
+      <StarRating sentiment={result.sentiment} confidence={result.confidence} />
+
       <div className="mb-4">
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
@@ -94,7 +99,10 @@ export function SentimentResultCard({ result }: SentimentResultProps) {
       </div>
 
       <div className="mb-4">
-        <p className="text-sm text-muted-foreground mb-2">Analyzed Text</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm text-muted-foreground">Analyzed Text</p>
+          <TextToSpeech text={result.text} />
+        </div>
         <p className="text-foreground bg-muted/50 p-3 rounded-lg text-sm leading-relaxed">
           "{result.text.length > 200 ? result.text.slice(0, 200) + '...' : result.text}"
         </p>
