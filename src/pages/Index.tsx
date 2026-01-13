@@ -9,9 +9,8 @@ import { AccuracyReport } from '@/components/dashboard/AccuracyReport';
 import { ImageUpload } from '@/components/dashboard/ImageUpload';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
-import { Layers, GitCompare, Plus, Trash2, Menu, Search, Bell, HelpCircle } from 'lucide-react';
+import { Layers, GitCompare, Plus, Trash2, Menu, Search, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('analyze');
@@ -99,19 +98,6 @@ const Index = () => {
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                   <HelpCircle className="w-5 h-5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </Button>
-                <div className="flex items-center gap-2 ml-2">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">JD</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium text-foreground">John</span>
-                </div>
               </div>
             </div>
           </header>
