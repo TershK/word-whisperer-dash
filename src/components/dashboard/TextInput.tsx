@@ -9,13 +9,29 @@ interface TextInputProps {
   isLoading?: boolean;
 }
 
+const MAX_WORDS = 500;
+
+const countWords = (text: string): number => {
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+};
+
 export function TextInput({ onAnalyze, onBatchAnalyze, isLoading }: TextInputProps) {
   const [text, setText] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const wordCount = countWords(text);
+  const isOverLimit = wordCount > MAX_WORDS;
+
+  const handleTextChange = (value: string) => {
+    const words = value.trim().split(/\s+/).filter(word => word.length > 0);
+    if (words.length <= MAX_WORDS) {
+      setText(value);
+    }
+  };
+
   const handleAnalyze = () => {
-    if (text.trim()) {
+    if (text.trim() && !isOverLimit) {
       onAnalyze(text.trim());
     }
   };
@@ -51,12 +67,19 @@ export function TextInput({ onAnalyze, onBatchAnalyze, isLoading }: TextInputPro
       </div>
 
       <div className="space-y-4">
-        <Textarea
-          placeholder="Enter text to analyze sentiment... (e.g., customer reviews, social media posts, feedback)"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="min-h-[150px] resize-none bg-background border-border focus:ring-2 focus:ring-primary/20"
-        />
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Enter text to analyze sentiment... (e.g., customer reviews, social media posts, feedback)"
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
+            className="min-h-[150px] resize-none bg-background border-border focus:ring-2 focus:ring-primary/20"
+          />
+          <div className="flex justify-end">
+            <span className={`text-xs ${isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}>
+              {wordCount}/{MAX_WORDS} words
+            </span>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -90,7 +113,7 @@ export function TextInput({ onAnalyze, onBatchAnalyze, isLoading }: TextInputPro
 
           <Button
             onClick={handleAnalyze}
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || isOverLimit}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Sparkles className="w-4 h-4 mr-2" />

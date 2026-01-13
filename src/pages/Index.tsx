@@ -7,6 +7,7 @@ import { BatchResults } from '@/components/dashboard/BatchResults';
 import { ComparisonView } from '@/components/dashboard/ComparisonView';
 import { AccuracyReport } from '@/components/dashboard/AccuracyReport';
 import { ImageUpload } from '@/components/dashboard/ImageUpload';
+import { SampleDataInput } from '@/components/dashboard/SampleDataInput';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
 import { Layers, GitCompare, Plus, Trash2, Menu, Search, HelpCircle } from 'lucide-react';
@@ -116,6 +117,11 @@ const Index = () => {
                     isLoading={isLoading}
                   />
                 </div>
+                
+                <SampleDataInput
+                  onBatchAnalyze={handleBatchAnalyze}
+                  isLoading={isLoading}
+                />
 
                 {currentResult && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
