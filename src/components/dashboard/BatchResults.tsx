@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { BatchResult, SentimentType } from '@/types/sentiment';
 import { SentimentChart } from './SentimentChart';
-import { Download, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, Minus, BarChart2 } from 'lucide-react';
+import { TextToSpeech } from './TextToSpeech';
+import { Download, ChevronDown, ChevronUp, ThumbsUp, ThumbsDown, Minus, BarChart2, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportToCSV, exportToJSON, exportToPDF } from '@/lib/exportUtils';
 
@@ -145,7 +146,10 @@ export function BatchResults({ batch }: BatchResultsProps) {
               </div>
               {expandedItems.has(result.id) && (
                 <div className="mt-4 pl-7 animate-fade-in">
-                  <p className="text-sm text-muted-foreground mb-2">Full Text:</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-muted-foreground">Full Text:</p>
+                    <TextToSpeech text={result.text} />
+                  </div>
                   <p className="text-foreground bg-muted/50 p-3 rounded-lg text-sm mb-3">
                     {result.text}
                   </p>

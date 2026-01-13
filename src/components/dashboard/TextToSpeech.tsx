@@ -4,9 +4,18 @@ import { Button } from '@/components/ui/button';
 
 interface TextToSpeechProps {
   text: string;
+  stripPunctuation?: boolean;
 }
 
-export function TextToSpeech({ text }: TextToSpeechProps) {
+// Remove punctuation symbols for cleaner speech
+const cleanTextForSpeech = (text: string): string => {
+  return text
+    .replace(/[.,!?;:'"()\[\]{}<>@#$%^&*_+=|\\\/~`—–-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+export function TextToSpeech({ text, stripPunctuation = false }: TextToSpeechProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
@@ -38,7 +47,8 @@ export function TextToSpeech({ text }: TextToSpeechProps) {
 
     window.speechSynthesis.cancel();
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    const textToSpeak = stripPunctuation ? cleanTextForSpeech(text) : text;
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.rate = 0.9;
     utterance.pitch = 1;
     

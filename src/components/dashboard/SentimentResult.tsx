@@ -101,7 +101,7 @@ export function SentimentResultCard({ result }: SentimentResultProps) {
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm text-muted-foreground">Analyzed Text</p>
-          <TextToSpeech text={result.text} />
+          <TextToSpeech text={result.text} stripPunctuation />
         </div>
         <p className="text-foreground bg-muted/50 p-3 rounded-lg text-sm leading-relaxed">
           "{result.text.length > 200 ? result.text.slice(0, 200) + '...' : result.text}"
