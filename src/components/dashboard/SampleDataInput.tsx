@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, X, Database, Sparkles } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, X, Database, Sparkles, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -10,6 +10,7 @@ interface SampleDataInputProps {
 
 export function SampleDataInput({ onBatchAnalyze, isLoading }: SampleDataInputProps) {
   const [samples, setSamples] = useState<string[]>(['']);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addSample = () => {
     setSamples((prev) => [...prev, '']);
@@ -21,6 +22,54 @@ export function SampleDataInput({ onBatchAnalyze, isLoading }: SampleDataInputPr
 
   const updateSample = (index: number, value: string) => {
     setSamples((prev) => prev.map((s, i) => (i === index ? value : s)));
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      let newSamples: string[] = [];
+
+      if (file.name.endsWith('.csv')) {
+        // Parse CSV - each line is a sample
+        newSamples = content
+          .split('\n')
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
+      } else if (file.name.endsWith('.txt')) {
+        // Parse TXT - split by double newlines or single lines
+        newSamples = content
+          .split(/\n\n|\r\n\r\n/)
+          .map((line) => line.trim().replace(/\n/g, ' '))
+          .filter((line) => line.length > 0);
+      } else if (file.name.endsWith('.json')) {
+        // Parse JSON - expect array of strings
+        try {
+          const parsed = JSON.parse(content);
+          if (Array.isArray(parsed)) {
+            newSamples = parsed.filter((item) => typeof item === 'string' && item.trim());
+          }
+        } catch {
+          console.error('Invalid JSON file');
+        }
+      }
+
+      if (newSamples.length > 0) {
+        setSamples((prev) => {
+          const existing = prev.filter((s) => s.trim());
+          return [...existing, ...newSamples];
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleAnalyze = () => {
@@ -35,9 +84,29 @@ export function SampleDataInput({ onBatchAnalyze, isLoading }: SampleDataInputPr
 
   return (
     <div className="card-dashboard p-6 animate-fade-in">
-      <div className="flex items-center gap-2 mb-4">
-        <Database className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold text-foreground">Add Sample Data</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Database className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Add Sample Data</h2>
+        </div>
+        <div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt,.json"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            Upload File
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3 mb-4 max-h-[300px] overflow-y-auto">
@@ -81,7 +150,7 @@ export function SampleDataInput({ onBatchAnalyze, isLoading }: SampleDataInputPr
       </div>
 
       <p className="text-xs text-muted-foreground mt-4">
-        Add multiple text samples to analyze as a batch. Each sample will be analyzed separately.
+        Add text samples manually or upload a file (.csv, .txt, .json). Each sample will be analyzed separately.
       </p>
     </div>
   );

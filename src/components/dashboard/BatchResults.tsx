@@ -148,7 +148,7 @@ export function BatchResults({ batch }: BatchResultsProps) {
                 <div className="mt-4 pl-7 animate-fade-in">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm text-muted-foreground">Full Text:</p>
-                    <TextToSpeech text={result.text} />
+                    <TextToSpeech text={result.text} stripPunctuation />
                   </div>
                   <p className="text-foreground bg-muted/50 p-3 rounded-lg text-sm mb-3">
                     {result.text}
