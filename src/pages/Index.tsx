@@ -8,6 +8,7 @@ import { ComparisonView } from '@/components/dashboard/ComparisonView';
 import { AccuracyReport } from '@/components/dashboard/AccuracyReport';
 import { ImageUpload } from '@/components/dashboard/ImageUpload';
 import { SampleDataInput } from '@/components/dashboard/SampleDataInput';
+import { SingleSentimentChart } from '@/components/dashboard/SingleSentimentChart';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
 import { Layers, GitCompare, Plus, Trash2, Menu, Search, HelpCircle } from 'lucide-react';
@@ -124,30 +125,10 @@ const Index = () => {
                 />
 
                 {currentResult && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <SentimentResultCard result={currentResult} />
-                    <div className="card-dashboard p-6">
-                      <h3 className="text-lg font-semibold text-foreground mb-4">
-                        Quick Tips
-                      </h3>
-                      <ul className="space-y-3 text-sm text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          Upload a .txt or .csv file for batch analysis
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          Each line in the file will be analyzed separately
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          Export results in CSV, JSON, or PDF format
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          Compare multiple batches to track sentiment trends
-                        </li>
-                      </ul>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <SentimentResultCard result={currentResult} />
+                      <SingleSentimentChart result={currentResult} />
                     </div>
                   </div>
                 )}
