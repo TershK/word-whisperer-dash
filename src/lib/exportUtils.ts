@@ -1,4 +1,105 @@
-import { BatchResult } from '@/types/sentiment';
+import { BatchResult, SentimentResult } from '@/types/sentiment';
+
+// Single result export functions
+export function exportSingleToCSV(result: SentimentResult): void {
+  const headers = ['Text', 'Sentiment', 'Confidence', 'Keywords', 'Explanation'];
+  const row = [
+    `"${result.text.replace(/"/g, '""')}"`,
+    result.sentiment,
+    (result.confidence * 100).toFixed(2),
+    `"${result.keywords.map(k => k.word).join(', ')}"`,
+    `"${result.explanation.replace(/"/g, '""')}"`
+  ];
+
+  const csvContent = [headers.join(','), row.join(',')].join('\n');
+  downloadFile(csvContent, `sentiment-analysis-${Date.now()}.csv`, 'text/csv');
+}
+
+export function exportSingleToJSON(result: SentimentResult): void {
+  const exportData = {
+    analyzedAt: new Date().toISOString(),
+    text: result.text,
+    sentiment: result.sentiment,
+    confidence: result.confidence,
+    keywords: result.keywords,
+    explanation: result.explanation
+  };
+
+  const jsonContent = JSON.stringify(exportData, null, 2);
+  downloadFile(jsonContent, `sentiment-analysis-${Date.now()}.json`, 'application/json');
+}
+
+export function exportSingleToPDF(result: SentimentResult): void {
+  const sentimentColor = result.sentiment === 'positive' ? '#16a34a' : result.sentiment === 'negative' ? '#dc2626' : '#f59e0b';
+  const badgeClass = result.sentiment === 'positive' ? 'badge-positive' : result.sentiment === 'negative' ? 'badge-negative' : 'badge-neutral';
+  
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sentiment Analysis Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; }
+    .summary { background: #f8fafc; padding: 24px; border-radius: 12px; margin: 24px 0; }
+    .sentiment-badge { display: inline-block; padding: 8px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; text-transform: capitalize; }
+    .badge-positive { background: #dcfce7; color: #16a34a; }
+    .badge-negative { background: #fee2e2; color: #dc2626; }
+    .badge-neutral { background: #fef3c7; color: #f59e0b; }
+    .confidence { font-size: 24px; font-weight: bold; color: ${sentimentColor}; margin: 16px 0; }
+    .text-content { background: #ffffff; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin: 20px 0; line-height: 1.6; }
+    .keywords { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .keyword { padding: 4px 12px; border-radius: 6px; font-size: 13px; }
+    .keyword-positive { background: #dcfce7; color: #16a34a; }
+    .keyword-negative { background: #fee2e2; color: #dc2626; }
+    .keyword-neutral { background: #fef3c7; color: #f59e0b; }
+    .explanation { background: #f1f5f9; padding: 16px; border-radius: 8px; font-style: italic; color: #475569; }
+    .section-title { font-size: 14px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 8px; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>📊 Sentiment Analysis Report</h1>
+  <p style="color: #64748b;">Generated on ${new Date().toLocaleString()}</p>
+  
+  <div class="summary">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div class="section-title">Sentiment</div>
+        <span class="sentiment-badge ${badgeClass}">${result.sentiment}</span>
+      </div>
+      <div style="text-align: right;">
+        <div class="section-title">Confidence</div>
+        <div class="confidence">${(result.confidence * 100).toFixed(1)}%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Analyzed Text</div>
+  <div class="text-content">${result.text}</div>
+
+  ${result.keywords.length > 0 ? `
+    <div class="section-title">Keywords Detected</div>
+    <div class="keywords">
+      ${result.keywords.map(kw => `<span class="keyword keyword-${kw.sentiment}">${kw.word}</span>`).join('')}
+    </div>
+  ` : ''}
+
+  <div class="section-title">Analysis Explanation</div>
+  <div class="explanation">${result.explanation}</div>
+</body>
+</html>`;
+
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  }
+}
+
 
 export function exportToCSV(batch: BatchResult): void {
   const headers = ['Text', 'Sentiment', 'Confidence', 'Keywords', 'Explanation'];
