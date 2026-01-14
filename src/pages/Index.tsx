@@ -10,9 +10,16 @@ import { ImageUpload } from '@/components/dashboard/ImageUpload';
 import { SampleDataInput } from '@/components/dashboard/SampleDataInput';
 import { SingleSentimentChart } from '@/components/dashboard/SingleSentimentChart';
 import { analyzeSentiment, analyzeBatch } from '@/lib/sentimentAnalyzer';
+import { exportSingleToCSV, exportSingleToJSON, exportSingleToPDF } from '@/lib/exportUtils';
 import { SentimentResult, BatchResult } from '@/types/sentiment';
-import { Layers, GitCompare, Plus, Trash2, Menu, Search, HelpCircle } from 'lucide-react';
+import { Layers, GitCompare, Plus, Trash2, Menu, Search, HelpCircle, Download, FileJson, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('analyze');
@@ -126,6 +133,31 @@ const Index = () => {
 
                 {currentResult && (
                   <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-foreground">Analysis Result</h2>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem onClick={() => exportSingleToCSV(currentResult)}>
+                            <FileText className="w-4 h-4 mr-2" />
+                            Export as CSV
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => exportSingleToJSON(currentResult)}>
+                            <FileJson className="w-4 h-4 mr-2" />
+                            Export as JSON
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => exportSingleToPDF(currentResult)}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Export as PDF
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <SentimentResultCard result={currentResult} />
                       <SingleSentimentChart result={currentResult} />
